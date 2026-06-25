@@ -21,6 +21,7 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "rest_framework_simplejwt",
+    "django_filters",
 
     "users.apps.UsersConfig",
     "habits.apps.HabitsConfig",
