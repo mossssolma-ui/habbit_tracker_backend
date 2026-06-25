@@ -1,6 +1,9 @@
 from django.conf import settings
 from django.db import models
 
+from habits.validators import validate_reward_and_related_habit, validate_duration, validate_related_habit_pleasant, \
+    validate_pleasant_no_reward_or_related, validate_frequency
+
 
 class Habit(models.Model):
     """Модель привычки"""
@@ -20,7 +23,8 @@ class Habit(models.Model):
                               help_text="Действие, которое представляет собой привычка")
     is_pleasant_habit = models.BooleanField(default=False, verbose_name="Приятная привычка",
                                             help_text="Привычка, которую можно привязать к выполнению полезной привычки")
-    related_habit = models.ForeignKey("self", on_delete=models.SET_NULL, related_name="related_habits", blank=True, null=True,
+    related_habit = models.ForeignKey("self", on_delete=models.SET_NULL, related_name="related_habits", blank=True,
+                                      null=True,
                                       verbose_name="Связанная привычка",
                                       help_text="Связанную привычку можно не указывать")
     frequency = models.PositiveIntegerField(default=1, verbose_name="Частота привычки",
@@ -33,6 +37,26 @@ class Habit(models.Model):
     is_public = models.BooleanField(default=False, verbose_name="Публичность привычки", help_text="Указать публичность")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    def clean(self):
+        """Валидация на уровне модели"""
+        validate_reward_and_related_habit(self.reward, self.related_habit)
+        validate_duration(self.time_to_complete)
+
+        if self.related_habit:
+            validate_related_habit_pleasant(self.related_habit)
+
+        validate_pleasant_no_reward_or_related(
+            self.is_pleasant_habit,
+            self.reward,
+            self.related_habit
+        )
+        validate_frequency(self.frequency)
+
+    def save(self, *args, **kwargs):
+        """Переопределям save для валидации"""
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.action} в {self.time} в {self.place}"
