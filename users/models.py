@@ -43,6 +43,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name="Дата регистрации"
     )
 
+    tg_chat_id = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name="Телеграм chat_id",
+        help_text="Укажите телеграм chat_id",
+    )
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
