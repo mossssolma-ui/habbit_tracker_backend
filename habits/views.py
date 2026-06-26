@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from habits.models import Habit
 from habits.paginators import CustomPaginator
-from habits.permissions import IsOwner
+from users.permissions import IsOwner
 from habits.serializers import HabitSerializer
 
 

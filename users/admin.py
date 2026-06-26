@@ -16,9 +16,9 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = (
         ("Изменить данные авторизации", {"fields": ("email", "password")}),
-        ("Данные пользователя", {"fields": ("first_name", "last_name", "phone_number", "city", "avatar")}),
+        ("Данные пользователя", {"fields": ("first_name", "last_name", "phone_number", "city", "avatar", "tg_chat_id")}),
         ("Права доступа", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
-        ("Дата рестрации/входа", {"fields": ("last_login", "date_joined")}),
+        ("Дата регистрации/входа", {"fields": ("last_login", "date_joined")}),
     )
 
     add_fieldsets = (
