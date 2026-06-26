@@ -4,7 +4,7 @@ from config.settings import TELEGRAM_URL, TG_API_KEY
 from habits.exceptions import FailedToConnect
 
 
-def send_telegram_message(chat_id, message):
+def send_telegram_message(chat_id: str, message: str) -> None:
     """Функция отправки сообщения пользователю о привычке в телеграм"""
     params = {
         "text": message,
