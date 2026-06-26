@@ -1,10 +1,15 @@
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 
 
 class IsOwner(IsAuthenticated):
-    """Проверка, что юзер является владельцем объекта"""
+    """Проверка, что юзер является владельцем привычки"""
 
     message = "Вы не являетесь владельцем этой привычки"
+
+    def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:

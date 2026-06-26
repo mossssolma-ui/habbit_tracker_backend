@@ -1,8 +1,13 @@
 from django.conf import settings
 from django.db import models
 
-from habits.validators import validate_reward_and_related_habit, validate_duration, validate_related_habit_pleasant, \
-    validate_pleasant_no_reward_or_related, validate_frequency
+from habits.validators import (
+    validate_duration,
+    validate_frequency,
+    validate_pleasant_no_reward_or_related,
+    validate_related_habit_pleasant,
+    validate_reward_and_related_habit,
+)
 
 
 class Habit(models.Model):
@@ -13,28 +18,52 @@ class Habit(models.Model):
         related_name="habits",
         on_delete=models.CASCADE,
         verbose_name="Создатель привычки",
-        help_text="Создатель привычки"
+        help_text="Создатель привычки",
     )
-    place = models.CharField(max_length=300, verbose_name="Место выполнения привычки",
-                             help_text="Место, в котором необходимо выполнять привычку")
-    time = models.TimeField(verbose_name="Время выполнения привычки",
-                            help_text="Время, когда необходимо выполнять привычку")
-    action = models.CharField(max_length=300, verbose_name="Действие привычки",
-                              help_text="Действие, которое представляет собой привычка")
-    is_pleasant_habit = models.BooleanField(default=False, verbose_name="Приятная привычка",
-                                            help_text="Привычка, которую можно привязать к выполнению полезной привычки")
-    related_habit = models.ForeignKey("self", on_delete=models.SET_NULL, related_name="related_habits", blank=True,
-                                      null=True,
-                                      verbose_name="Связанная привычка",
-                                      help_text="Связанную привычку можно не указывать")
-    frequency = models.PositiveIntegerField(default=1, verbose_name="Частота привычки",
-                                            help_text="Укажите периодичность выполнения привычки в днях")
-    reward = models.CharField(max_length=300, blank=True, null=True, verbose_name="Вознаграждение",
-                              help_text="Чем пользователь должен себя вознаградить после выполнения")
+    place = models.CharField(
+        max_length=300,
+        verbose_name="Место выполнения привычки",
+        help_text="Место, в котором необходимо выполнять привычку",
+    )
+    time = models.TimeField(
+        verbose_name="Время выполнения привычки", help_text="Время, когда необходимо выполнять привычку"
+    )
+    action = models.CharField(
+        max_length=300, verbose_name="Действие привычки", help_text="Действие, которое представляет собой привычка"
+    )
+    is_pleasant_habit = models.BooleanField(
+        default=False,
+        verbose_name="Приятная привычка",
+        help_text="Привычка, которую можно привязать к выполнению полезной привычки",
+    )
+    related_habit = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        related_name="related_habits",
+        blank=True,
+        null=True,
+        verbose_name="Связанная привычка",
+        help_text="Связанную привычку можно не указывать",
+    )
+    frequency = models.PositiveIntegerField(
+        default=1, verbose_name="Частота привычки", help_text="Укажите периодичность выполнения привычки в днях"
+    )
+    reward = models.CharField(
+        max_length=300,
+        blank=True,
+        null=True,
+        verbose_name="Вознаграждение",
+        help_text="Чем пользователь должен себя вознаградить после выполнения",
+    )
 
-    time_to_complete = models.PositiveIntegerField(verbose_name="Время выполнение в секундах(не больше 120 с)",
-                                                   default=120, help_text="Укажите время выполнения привычки")
-    is_public = models.BooleanField(default=False, verbose_name="Публичность привычки", help_text="Указать публичность")
+    time_to_complete = models.PositiveIntegerField(
+        verbose_name="Время выполнение в секундах(не больше 120 с)",
+        default=120,
+        help_text="Укажите время выполнения привычки",
+    )
+    is_public = models.BooleanField(
+        default=False, verbose_name="Публичность привычки", help_text="Указать публичность"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
@@ -46,11 +75,7 @@ class Habit(models.Model):
         if self.related_habit:
             validate_related_habit_pleasant(self.related_habit)
 
-        validate_pleasant_no_reward_or_related(
-            self.is_pleasant_habit,
-            self.reward,
-            self.related_habit
-        )
+        validate_pleasant_no_reward_or_related(self.is_pleasant_habit, self.reward, self.related_habit)
         validate_frequency(self.frequency)
 
     def save(self, *args, **kwargs):
@@ -64,4 +89,4 @@ class Habit(models.Model):
     class Meta:
         verbose_name = "Привычка"
         verbose_name_plural = "Привычки"
-        ordering = ['-created_at']
+        ordering = ["-created_at"]

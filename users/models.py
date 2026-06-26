@@ -27,7 +27,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     username = None
     email = models.EmailField(unique=True, verbose_name="Email", help_text="Укажите почту")
     first_name = models.CharField(max_length=50, null=True, blank=True, verbose_name="Имя", help_text="Укажите имя")
-    last_name = models.CharField(max_length=50, null=True, blank=True, verbose_name="Фамилия", help_text="Укажите фамилию")
+    last_name = models.CharField(
+        max_length=50, null=True, blank=True, verbose_name="Фамилия", help_text="Укажите фамилию"
+    )
     phone_number = models.CharField(
         max_length=15, blank=True, null=True, verbose_name="Телефон", help_text="Укажите телефон"
     )
@@ -38,10 +40,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    date_joined = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Дата регистрации"
-    )
+    date_joined = models.DateTimeField(auto_now_add=True, verbose_name="Дата регистрации")
 
     tg_chat_id = models.CharField(
         max_length=50,
@@ -63,5 +62,3 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
         ordering = ["-email"]
-
-
