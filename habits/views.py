@@ -1,13 +1,15 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import generics, viewsets
 from rest_framework.filters import OrderingFilter
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from habits.models import Habit
 from habits.paginators import CustomPaginator
-from users.permissions import IsOwner
 from habits.serializers import HabitSerializer
+from users.permissions import IsOwner
 
 
 class HabitViewSet(viewsets.ModelViewSet):
@@ -29,6 +31,9 @@ class HabitViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Возвращает привычки текущего пользователя"""
+        if hasattr(self, "request") and self.request.user.is_anonymous:
+            return Habit.objects.none()
+
         user = self.request.user
         return Habit.objects.filter(user=user)
 
@@ -44,14 +49,36 @@ class HabitViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """Назначение прав доступа при различных действиях"""
-        if self.action in ['list', 'create', 'retrieve']:
+        if self.action in ["list", "create", "retrieve"]:
             self.permission_classes = [IsAuthenticated]
-        elif self.action in ['update', 'partial_update', 'destroy']:
+        elif self.action in ["update", "partial_update", "destroy"]:
             self.permission_classes = [IsOwner]
         else:
             self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
 
+    @swagger_auto_schema(
+        operation_description="Получить список своих привычек с пагинацией и статистикой",
+        responses={
+            200: openapi.Response(
+                description="Список привычек",
+                examples={
+                    "application/json": {
+                        "count": 5,
+                        "next": "http://localhost:8000/api/habits/?page=2",
+                        "previous": None,
+                        "total_count": 10,
+                        "public_count": 3,
+                        "private_count": 7,
+                        "pleasant_count": 2,
+                        "results": [
+                            {"id": 1, "place": "Дом", "time": "08:00:00", "action": "Зарядка", "is_public": True}
+                        ],
+                    }
+                },
+            )
+        },
+    )
     def list(self, request, *args, **kwargs):
         """Переопределение list для возврата статистики"""
         queryset = self.filter_queryset(self.get_queryset())
@@ -64,24 +91,33 @@ class HabitViewSet(viewsets.ModelViewSet):
         page = self.paginate_queryset(queryset)
         if page:
             serializer = self.get_serializer(page, many=True)
-            return Response({
-                'count': self.paginator.page.paginator.count,
-                'next': self.paginator.get_next_link(),
-                'previous': self.paginator.get_previous_link(),
-                'total_count': total_count,
-                'public_count': public_count,
-                'private_count': private_count,
-                'pleasant_count': pleasant_count,
-                'results': serializer.data
-            })
+            return Response(
+                {
+                    "count": self.paginator.page.paginator.count,
+                    "next": self.paginator.get_next_link(),
+                    "previous": self.paginator.get_previous_link(),
+                    "total_count": total_count,
+                    "public_count": public_count,
+                    "private_count": private_count,
+                    "pleasant_count": pleasant_count,
+                    "results": serializer.data,
+                }
+            )
 
 
 class PublicHabitListAPIView(generics.ListAPIView):
     """Вывод только публичных привычек"""
+
     serializer_class = HabitSerializer
     pagination_class = CustomPaginator
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(
+        operation_description="Получить список публичных привычек (доступно без авторизации)",
+        responses={
+            200: HabitSerializer(many=True),
+        },
+    )
     def get_queryset(self):
         """Возвращает только публичные привычки"""
         return Habit.objects.filter(is_public=True)

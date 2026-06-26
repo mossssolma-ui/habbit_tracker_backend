@@ -13,7 +13,7 @@ class Command(BaseCommand):
         password = os.getenv("CSU_PASSWORD")
 
         if not email or not password:
-            self.stdout.write(self.style.ERROR(f"Не указаны email и password в .env файле"))
+            self.stdout.write(self.style.ERROR("Не указаны email и password в .env файле"))
             return
 
         if CustomUser.objects.filter(email=email).exists():
