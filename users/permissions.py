@@ -6,11 +6,6 @@ class IsOwner(IsAuthenticated):
 
     message = "Вы не являетесь владельцем этой привычки"
 
-    def has_permission(self, request, view):
-        if request.user.is_anonymous:
-            return False
-        return True
-
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True

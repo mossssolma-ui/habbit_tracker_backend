@@ -14,4 +14,4 @@ def send_telegram_message(chat_id: str, message: str) -> None:
         response = requests.get(f"{TELEGRAM_URL}{TG_API_KEY}/sendMessage", params=params, timeout=10)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        raise FailedToConnect(f"Ошибка подключения к ТГ: {e}") from e
+        raise FailedToConnect("Ошибка подключения к ТГ") from e

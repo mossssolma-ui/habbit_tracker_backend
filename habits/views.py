@@ -31,7 +31,7 @@ class HabitViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Возвращает привычки текущего пользователя"""
-        if hasattr(self, "request") and self.request.user.is_anonymous:
+        if self.request.user.is_anonymous:
             return Habit.objects.none()
 
         user = self.request.user

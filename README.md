@@ -272,9 +272,9 @@ habit_tracker_backend/
 │   ├── urls.py             
 │   └── tests.py            
 │ 
-├── .env.template           # Шаблон переменных
+├── .env.template           # Шаблон переменных окружения
 ├── pyproject.toml          # Зависимости
-└── README.md               # Этот файл
+└── README.md
 ```
 
 ## Лицензия
