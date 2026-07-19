@@ -1,0 +1,108 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: redis-cli ping
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  celery:
+    restart: unless-stopped
+    build: .
+    command: celery -A config worker -l INFO -P eventlet
+    env_file:
+      - .env
+    volumes:
+      - .:/habits
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-beat:
+    restart: unless-stopped
+    build: .
+    command: celery -A config beat -l INFO
+    env_file:
+      - .env
+    volumes:
+      - .:/habits
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  backend:
+    restart: unless-stopped
+    build: .
+    command: >
+      bash -c "python manage.py migrate &&
+      python manage.py csu &&
+      gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    volumes:
+      - .:/habits
+      - django_media:/habits/media/
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  static_collector:
+    build: .
+    command: bash -c "python manage.py collectstatic -c --no-input"
+    env_file:
+      - .env
+    volumes:
+      - django_static:/habits/staticfiles/
+
+  web:
+    restart: unless-stopped
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_started
+      static_collector:
+        condition: service_completed_successfully
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - django_static:/habits/staticfiles/
+      - django_media:/habits/media
+
+
+volumes:
+  postgres_data:
+  redis_data:
+  django_static:
+  django_media:
