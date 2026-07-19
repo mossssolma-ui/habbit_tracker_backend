@@ -70,6 +70,7 @@ poetry install
 SECRET_KEY=django-insecure-9x4f7k2p8w5sdfsdfq9r2t8y............
 
 DEBUG=True
+ALLOWED_HOSTS=IP-сервера,localhost,127.0.0.1
 
 DB_ENGINE=django.db.backends.postgresql_psycopg2
 DB_NAME=habit_tracker_backend
@@ -124,6 +125,41 @@ celery -A config beat -l info
 ```bash
 python manage.py runserver
 ```
+
+## Запуск через Docker (Рекомендуемый способ)
+Проект полностью контейнеризирован и запускается одной командой.
+1. **Убедитесь, что у вас установлены Docker и Docker Compose.**
+2. **Создайте файл .env в корне проекта (или используйте .env.template).**
+3. **Выполните команду:**
+```bash
+docker compose up -d --build
+```
+4. **Приложение будет доступно по адресу: http://localhost/**
+5. **Для остановки выполните:** 
+```bash
+docker compose down
+```
+(Примечание: для локальной разработки используется корневой docker-compose.yml, для продакшена — deploy/docker-compose.yml)
+
+
+## CI/CD и Автоматический деплой
+### Проект настроен на автоматическое тестирование и деплой с помощью GitHub Actions.
+**Как это работает:**
+1. При создании Pull Request в ветку develop автоматически запускается пайплайн.
+2. Выполняются проверки: линтинг (black, isort, flake8), запуск тестов с измерением покрытия (coverage) и проверка сборки Docker-образов.
+3. Если все проверки пройдены успешно, происходит автоматический деплой на удаленный сервер (Yandex Cloud) через SSH.
+### Настройка секретов (GitHub Secrets)
+** Для работы деплоя в настройках репозитория (Settings -> Secrets and variables -> Actions) должны быть добавлены следующие переменные:**
+* SSH_KEY: Приватный SSH-ключ для подключения к серверу.
+* SSH_USER: Имя пользователя на сервере. (yc-user)
+* SERVER_IP: Публичный IP-адрес сервера.
+* DEPLOY_DIR: Абсолютный путь к папке проекта на сервере (например, /home/yc-user/habit_tracker_backend).
+* DOCKER_HUB_USERNAME и DOCKER_HUB_ACCESS_TOKEN: Для сборки и хранения образов (опционально, если используется).
+
+### Подготовка сервера:
+* На сервере должны быть установлены docker и docker-compose-plugin. 
+* В папке проекта (DEPLOY_DIR) должен находиться настроенный файл .env с продакшен-параметрами (DEBUG=False, корректные пароли БД, DB_HOST=db, REDIS_HOST=redis).
+
 
 ## Модель данных
 
