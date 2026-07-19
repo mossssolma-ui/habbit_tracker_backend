@@ -1,6 +1,6 @@
 # Habit Tracker Backend
 
-[![Python](https://img.shields.io/badge/Python-3.14-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-6.0-green.svg)](https://www.djangoproject.com/)
 [![DRF](https://img.shields.io/badge/DRF-3.17-red.svg)](https://www.django-rest-framework.org/)
 [![Coverage](https://img.shields.io/badge/Coverage-83%25-brightgreen.svg)]()
@@ -27,7 +27,7 @@ Backend-часть SPA-приложения для трекера полезны
 
 ## Технологии
 
-- Python 3.14
+- Python 3.13
 - Django 6.0
 - Django REST Framework 3.17
 - PostgreSQL
